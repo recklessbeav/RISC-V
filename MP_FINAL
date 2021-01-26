@@ -1,0 +1,139 @@
+.globl main
+#Beaverly Cuasi S15
+   
+   		
+.data
+final: .asciz "Final answer: "
+term1: .asciz "Term 1: "
+numerator: .float -1
+denom1: .float 2
+denom2: .float 1
+xrad: .float 5
+exp1: .float 2
+exp2: .float 1
+n: .float 5
+numAns: .float 1
+
+.text
+
+###############################################################
+
+main:
+
+li t6, 2 #n
+li a2, 2 #n
+
+main2:
+la t0, numerator #base_numerator
+la t1, denom1 #denom1
+la t2, denom2
+li t3, 5 #xrad
+la t4, exp1
+la t5, exp2
+li s0, 1 #i
+li s1, 0
+li s3, 1 #fact
+li s5, 1
+li s6, 1 #for subtraction
+li s7, 1
+la a0, numAns #answer for numerator
+
+
+###############################################################
+
+#Convert it to float 
+
+flw f0, 0(t0)
+flw f1, 0(t1)
+flw f2, 0(t2)
+#flw f3, 0(t3)
+flw f4, 0(t4)
+flw f5, 0(t5)
+flw f8, 0(a0)
+
+###############################################################
+
+
+LOOP1:
+
+	# while(exp != 0)
+	# result *= base;
+	# --exp
+	
+	bne t6, s1, NumPower
+	j DenomFac
+	
+NumPower:
+	fmul.s f8, f8, f0 #f8 yung sagot 						#(-1)^1
+	#sub t6, t6, s7
+	#j LOOP1
+
+LOOP3:
+	bne 
+
+DenomFac:
+	fcvt.s.w f6, t6 #cinonvert yung n sa float 					#2		#1
+	fmul.s f9, f1, f6 #linagay sa f9 yung 2n					#2*2		#2*1
+	fadd.s f9, f9, f2 #answer f9, (2n+1)						#5		#3
+	
+PreFac:
+	fcvt.w.s s2,f9
+	ble s0, s2, Factorial
+	j PreRadianPower
+	
+Factorial:
+	
+	# for (i = 1; i <= n; ++i) { N IS UR S2 #s0 is yung i
+        # fact *= i;
+        
+        mul s3, s3, s0 #answer s3, 120 (integer)
+        addi s0, s0, 1
+        j PreFac
+
+PreRadianPower:
+
+	fcvt.s.w f9, s3 #cinonvert yung s3 sa float
+	fmul.s f13, f4, f6 #2n na yung f13
+	fadd.s f13, f13, f2 #2n+1 na yung f13 exponent
+	fcvt.w.s s4, f13 #integer na yung 2n+1
+	
+LOOP2:
+	
+	# while(exp != 0)
+	# result *= base;
+	# --exp
+	
+	bne s4, s1, RadianPower
+	j MultiplyAll
+	
+RadianPower:
+	
+	mul s5, s5, t3 #answer ng radian (int)
+	sub s4, s4, s6
+	j LOOP2
+	
+MultiplyAll:
+	
+	#(f8/s3)*s5
+	fcvt.s.w f11, s3
+	fcvt.s.w f12, s5
+	
+	fdiv.s f8, f8, f11
+	fmul.s f10, f8, f12
+	
+	#li a7, 4
+	#la a0, term1
+	#ecall 
+	
+	li a7, 2
+	ecall 
+
+
+	
+	
+	
+
+
+
+
+
