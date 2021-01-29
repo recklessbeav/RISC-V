@@ -1,18 +1,22 @@
-.globl main
+.globl main 
 #Beaverly Cuasi S15
-   
-   		
+
+.macro NEWLINE
+li a0, 10
+li a7, 11
+ecall
+.end_macro
+
 .data
-final: .asciz "Final answer: "
-numerator: .word -1
-denom1: .word 2
-denom2: .word 1
-Pi_1: .float 22
-Pi_2: .float 7
-xrad: .float 180
-exp1: .word 2
-exp2: .word 1
-n: .word 1
+string: .asciz "Final: "
+term: .asciz "Term "
+space: .asciz ": "
+n: .byte 5
+num: .float -1.0
+num2: .float -1.0
+denom1: .float 1.0
+denom2: .float 2.0
+x: .float 2 #radian
 
 .text
 
@@ -20,94 +24,122 @@ n: .word 1
 
 main:
 
-li t0, -1 #base_numerator
-li t1, 2  #denom1
-li t2, 1
-li t3, 22
-li t4, 7
-li t5, 180
-li t6, 2 #exp1
-li s0, 1 #exp2
-li s1, 1 #exponent_n ;kung nagpalit to 
-li a3, 1
-li a4, 0 #checker loop
-li a5, 1 #for subtraction
-#li a6, 4 #for checking
-li a7, 1 #for i
-li s10, 1 #exponent sa x
-li s4, 1 #final x_radian
+la t1, x
+la t2, denom2
+la t3, n
+la t4, num
+la t5, num2
+la t6, denom1
+
+###############################################################
+	
+flw f1, (t1) #x 
+flw f4, (t4) #numerator
+flw f5, (t5) #numerator2
+flw f6, (t6) ##denom1 = 1.0
+flw f2, (t2) #denom2 = 2.0
+
+###############################################################
+	
+	fmv.s f30, f1
+	lbu a1, (t3)  #n
+	
+	#LOOP1
+	li s1, 0
+	li s2, 1
+	li s5, 1
+	li s7, 0
+	fcvt.s.wu f20, s7
+	
+	#n=+1
+	addi a1,a1,1
+	
+###############################################################	
+
+NUMERATOR:
+	beq a1, s1, EXIT
+	fmul.s f5, f5, f4 #numerator 
+	fcvt.s.wu f3, s1 
+	fmadd.s f0, f2, f3, f6 #2n+1
+	fcvt.wu.s x10, f0 
+	mv a2, x10 
+	mv s3, x10 
+	mv s4, x10 
+	j FACTORIAL 
 
 ###############################################################
 
-#flw f0, 0(t3)
-#flw f1, 0(t4)
-#flw f2, 0(t5)
+FACTORIAL: 
+	beq s3, s2, DIVISION
+	sub s4, s4, s2 
+	mul a2, a2, s4 #factorial
+	sub s3, s3, s2
+	j FACTORIAL 
+	
+###############################################################
+
+DIVISION:
+	fcvt.s.wu f28, a2 
+	fdiv.s f28, f5, f28 #num/denom
+	fmadd.s f18,f2,f3,f6 #exponent multiply
+	fcvt.wu.s s6, f18 
+	j MULTIPLY
 
 ###############################################################
 
-
-LOOP1:
-	
-	# while(exp != 0)
-	# result *= base;
-	# --exp
-	#sub s1, s1, a5 #s1 is yung exponent 
-	bne s1, a4, NumPower
-	j END
-	
-NumPower:
-	mul a3, t0, a3 #answer dito si a3 #(-1^n)
-	
-DenomFac:
-	mul a6, t1, s1 #2n
-	addi a6, a6, 1 #answer dito si a6 (2n+1)
-	
-	
-Pre_Fac:
-        ble a7, a6, Factorial
-        j PreRadianPower
-	
-Factorial:
-	
-	# for (i = 1; i <= n; ++i) { N IS UR A6 #a7 is yung i
-        # fact *= i;
-        
-        mul t2, t2, a7 #answer dito is t2
-        addi a7, a7, 1 
-        j Pre_Fac
-
-PreRadianPower:
-	
-	mul s8, t6, s1 #2n 
-	addi s10, s8, 1 #exponent is s10
-	
-	div a2, t3, t4 #pi is ft5
-	div s3, t5, a2 #fa1 yung x
-	
-LOOP2:
-
-	# while(exp != 0)
-	# result *= base;
-	# --exp
-	
-	bne s10, a4, RadianPower
-	j Multiply_All
-	
-RadianPower:
-
-	#fcvt.wu.s s3, fa1
-	mul s4, s3, s4 #s4 yung final x 
-	sub s10, s10, a5
-	j LOOP2
-	
-Multiply_All:
-	
-	# (a3/t2)*s4
-	
-	div s7, a3, t2
-	mul a0, s7, s4
+MULTIPLY:	
+	beq s5, s6, PRINT 
+	fmul.s f1, f30, f1
+	addi s5, s5, 1
+	j MULTIPLY
 
 ###############################################################
-END:
+
+PRINT: 	
+	fmul.s f19, f28, f1 
+	
+	li a7, 4
+	la a0, term
 	ecall
 	
+	
+	li a7, 1
+	mv a0, s1
+	ecall
+	
+	
+	li a7, 4
+	la a0, space
+	ecall
+	
+	
+	li a7, 2
+	fmv.s fa0, f19
+	ecall
+	
+	
+	fadd.s f20, f19,f20
+	NEWLINE
+	
+	
+	addi s1,s1,1
+	j NUMERATOR
+	
+###############################################################	
+	
+EXIT:
+	
+	li a7, 4
+	la a0, string
+	ecall 
+	
+	
+	li a7, 2
+	fmv.s fa0, f20
+	ecall
+	
+	
+	li a7, 10
+    	ecall
+	
+		
