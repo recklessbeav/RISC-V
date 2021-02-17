@@ -8,7 +8,7 @@ ecall
 .end_macro
 
 .data
-string: .asciz "Final: "
+string: .asciz "Summation Final: "
 term: .asciz "Term "
 space: .asciz ": "
 n: .byte 5
@@ -16,7 +16,7 @@ num: .float -1.0
 num2: .float -1.0
 denom1: .float 1.0
 denom2: .float 2.0
-x: .float 2 #radian
+x: .float 5 #radian
 
 .text
 
